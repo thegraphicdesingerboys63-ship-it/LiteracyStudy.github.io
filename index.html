@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS // Game Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00f5ff;
+            --neon-magenta: #ff00ff;
+            --neon-yellow: #ffff00;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050508;
+            --card-bg: #12121a;
+            --text-bright: #ffffff;
+            --text-dim: #8b8b9f;
+            --accent-glow: rgba(0, 245, 255, 0.2);
+            --transition-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--darker-bg);
+            color: var(--text-bright);
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Enhanced animated background */
+        .bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 245, 255, 0.05), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.05), transparent 50%),
+                linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
+            animation: gridFloat 30s linear infinite;
+        }
+
+        @keyframes gridFloat {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            z-index: 2;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 3;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            position: relative;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { 
+                filter: drop-shadow(0 0 20px var(--neon-cyan)) drop-shadow(0 0 40px var(--neon-magenta));
+            }
+            50% { 
+                filter: drop-shadow(0 0 30px var(--neon-cyan)) drop-shadow(0 0 60px var(--neon-magenta));
+            }
+        }
+
+        header p {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: var(--text-dim);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        /* Username section */
+        .user-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(18, 18, 26, 0.6);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .username-display {
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            margin-bottom: 15px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .username-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            border: none;
+            border-radius: 25px;
+            color: var(--dark-bg);
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s var(--transition-smooth);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 5px;
+        }
+
+        .username-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.4);
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 20px 30px;
+            background: rgba(18, 18, 26, 0.6);
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s var(--transition-smooth);
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 5px;
+        }
+
+        /* Controls section */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            background: rgba(18, 18, 26, 0.8);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 10px;
+            color: var(--text-bright);
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s var(--transition-smooth);
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 245, 255, 0.1);
+            border-color: var(--neon-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px var(--accent-glow);
+        }
+
+        /* Search bar */
+        .search-container {
+            max-width: 600px;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 18px 50px 18px 25px;
+            background: rgba(18, 18, 26, 0.8);
+            border: 2px solid rgba(0, 245, 255, 0.3);
+            border-radius: 15px;
+            color: var(--text-bright);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s var(--transition-smooth);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-bar:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .search-bar::placeholder {
+            color: var(--text-dim);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-cyan);
+            font-size: 1.3rem;
+            pointer-events: none;
+        }
+
+        /* Filter buttons */
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(18, 18, 26, 0.6);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 20px;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s var(--transition-smooth);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(0, 245, 255, 0.15);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Games grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Game card */
+        .game-card {
+            position: relative;
+            background: rgba(18, 18, 26, 0.8);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s var(--transition-smooth);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(0, 245, 255, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s var(--transition-smooth);
+            pointer-events: none;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 15px 40px var(--accent-glow);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 0, 255, 0.1));
+        }
+
+        .game-info {
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-bright);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .game-description {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .game-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .game-tag {
+            padding: 5px 12px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            background: var(--card-bg);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0, 245, 255, 0.3);
+            animation: scaleIn 0.4s var(--transition-smooth);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(0, 245, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            color: #ff4444;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s var(--transition-smooth);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .game-frame {
+            width: 100%;
+            height: calc(100% - 80px);
+            border: none;
+        }
+
+        /* Calculator styles */
+        .calculator-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(18, 18, 26, 0.95);
+            border: 2px solid rgba(0, 245, 255, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .calc-display {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: right;
+            min-height: 100px;
+        }
+
+        .calc-previous {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .calc-current {
+            font-size: 2.5rem;
+            color: var(--neon-cyan);
+            font-weight: 700;
+            word-wrap: break-word;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .calc-btn {
+            padding: 20px;
+            background: rgba(18, 18, 26, 0.8);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-bright);
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s var(--transition-smooth);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .calc-btn:hover {
+            background: rgba(0, 245, 255, 0.15);
+            border-color: var(--neon-cyan);
+            transform: translateY(-2px);
+        }
+
+        .calc-btn.operator {
+            background: rgba(0, 245, 255, 0.1);
+            color: var(--neon-cyan);
+        }
+
+        .calc-btn.equals {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            color: var(--dark-bg);
+            font-weight: 800;
+        }
+
+        .calc-btn.span-2 {
+            grid-column: span 2;
+        }
+
+        .calc-history {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .calc-history-item {
+            padding: 8px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Cloak menu */
+        .cloak-menu {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(18, 18, 26, 0.98);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 20px;
+            padding: 40px;
+            z-index: 2000;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(20px);
+            animation: scaleIn 0.3s var(--transition-smooth);
+        }
+
+        .cloak-menu.active {
+            display: block;
+        }
+
+        .cloak-menu h2 {
+            color: var(--neon-cyan);
+            margin-bottom: 25px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.8rem;
+        }
+
+        .cloak-options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .cloak-option {
+            padding: 18px;
+            background: rgba(0, 245, 255, 0.05);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .cloak-option:hover {
+            background: rgba(0, 245, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .cloak-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .cloak-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text-bright);
+        }
+
+        .cloak-info p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(18, 18, 26, 0.98);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 15px;
+            padding: 20px 30px;
+            color: var(--text-bright);
+            font-size: 1rem;
+            z-index: 3000;
+            animation: slideInRight 0.4s var(--transition-smooth);
+            box-shadow: 0 10px 40px var(--accent-glow);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-cyan);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+
+            .stats-bar {
+                gap: 15px;
+            }
+
+            .stat {
+                padding: 15px 20px;
+            }
+
+            .calc-buttons {
+                gap: 8px;
+            }
+
+            .calc-btn {
+                padding: 15px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            .modal-content {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 245, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--neon-cyan);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-100vh) translateX(100px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background effects -->
+    <div class="bg-canvas"></div>
+    <div class="grid-overlay"></div>
+    <div class="scanline"></div>
+
+    <!-- Floating particles -->
+    <script>
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>NEXUS</h1>
+            <p>Game Hub</p>
+        </header>
+
+        <!-- User Section -->
+        <div class="user-section">
+            <div class="username-display" id="usernameDisplay">Welcome, Guest</div>
+            <button class="username-btn" onclick="setUsername()">Set Username</button>
+            <button class="username-btn" onclick="clearUsername()">Clear Username</button>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="gamesCount">50+</div>
+                <div class="stat-label">Games</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="categoriesCount">8</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">Hours of Fun</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" onclick="openCalculator()">🧮 Calculator</button>
+            <button class="control-btn" onclick="openCloakMenu()">🎭 Tab Cloak</button>
+            <button class="control-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search games..." oninput="searchGames()">
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <button class="filter-btn active" onclick="filterGames('all')">All Games</button>
+            <button class="filter-btn" onclick="filterGames('action')">Action</button>
+            <button class="filter-btn" onclick="filterGames('puzzle')">Puzzle</button>
+            <button class="filter-btn" onclick="filterGames('racing')">Racing</button>
+            <button class="filter-btn" onclick="filterGames('sports')">Sports</button>
+            <button class="filter-btn" onclick="filterGames('strategy')">Strategy</button>
+            <button class="filter-btn" onclick="filterGames('arcade')">Arcade</button>
+            <button class="filter-btn" onclick="filterGames('multiplayer')">Multiplayer</button>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="games-grid" id="gamesGrid"></div>
+    </div>
+
+    <!-- Game Modal -->
+    <div class="modal" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Game Title</h2>
+                <button class="close-btn" onclick="closeGame()">×</button>
+            </div>
+            <iframe class="game-frame" id="gameFrame"></iframe>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div class="modal" id="calculatorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Calculator</h2>
+                <button class="close-btn" onclick="closeCalculator()">×</button>
+            </div>
+            <div class="calculator-container">
+                <div class="calc-display">
+                    <div class="calc-previous" id="calcPrevious"></div>
+                    <div class="calc-current" id="calcCurrent">0</div>
+                </div>
+                <div class="calc-buttons">
+                    <button class="calc-btn" onclick="calcClear()">C</button>
+                    <button class="calc-btn" onclick="calcDelete()">⌫</button>
+                    <button class="calc-btn operator" onclick="calcInput('%')">%</button>
+                    <button class="calc-btn operator" onclick="calcInput('/')">÷</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn operator" onclick="calcInput('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn operator" onclick="calcInput('-')">−</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+                    
+                    <button class="calc-btn span-2" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    <button class="calc-btn equals" onclick="calcEquals()">=</button>
+                </div>
+                <div class="calc-history" id="calcHistory"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloak Menu -->
+    <div class="cloak-menu" id="cloakMenu">
+        <h2>Tab Disguise</h2>
+        <div class="cloak-options">
+            <div class="cloak-option" onclick="setCloak('google-classroom')">
+                <img class="cloak-icon" src="https://ssl.gstatic.com/classroom/ic_product_classroom_32.png" alt="Classroom">
+                <div class="cloak-info">
+                    <h3>Google Classroom</h3>
+                    <p>Blend in with your assignments</p>
+                </div>
+            </div>
+            <div class="cloak-option" onclick="setCloak('google-drive')">
+                <img class="cloak-icon" src="https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png" alt="Drive">
+                <div class="cloak-info">
+                    <h3>Google Drive</h3>
+                    <p>Look like you're working on files</p>
+                </div>
+            </div>
+            <div class="cloak-option" onclick="setCloak('google-docs')">
+                <img class="cloak-icon" src="https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" alt="Docs">
+                <div class="cloak-info">
+                    <h3>Google Docs</h3>
+                    <p>Appear to be typing a document</p>
+                </div>
+            </div>
+            <div class="cloak-option" onclick="setCloak('reset')">
+                <div class="cloak-icon" style="background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🎮</div>
+                <div class="cloak-info">
+                    <h3>Reset to Normal</h3>
+                    <p>Show the real game hub</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Games database
+        const games = [
+            {
+                name: "1v1.lol",
+                url: "https://1v1.lol",
+                category: ["multiplayer", "action"],
+                description: "Battle royale building game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=1v1.lol"
+            },
+            {
+                name: "2048",
+                url: "https://play2048.co",
+                category: ["puzzle"],
+                description: "Classic number puzzle game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=2048"
+            },
+            {
+                name: "Among Us",
+                url: "https://now.gg/play/innersloth-llc/4047/among-us",
+                category: ["multiplayer", "strategy"],
+                description: "Social deduction party game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Among+Us"
+            },
+            {
+                name: "Basketball Stars",
+                url: "https://www.crazygames.com/game/basketball-stars",
+                category: ["sports"],
+                description: "Fast-paced basketball action",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Basketball"
+            },
+            {
+                name: "Bloxorz",
+                url: "https://www.coolmathgames.com/0-bloxorz",
+                category: ["puzzle"],
+                description: "Roll the block into the hole",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Bloxorz"
+            },
+            {
+                name: "Chess",
+                url: "https://www.chess.com/play/computer",
+                category: ["strategy"],
+                description: "Classic strategy board game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Chess"
+            },
+            {
+                name: "Chrome Dino",
+                url: "https://chromedino.com",
+                category: ["arcade"],
+                description: "Endless runner with a T-Rex",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Dino"
+            },
+            {
+                name: "Cookie Clicker",
+                url: "https://orteil.dashnet.org/cookieclicker/",
+                category: ["arcade"],
+                description: "Addictive idle clicker game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Cookie"
+            },
+            {
+                name: "Crossy Road",
+                url: "https://www.crazygames.com/game/crossy-road",
+                category: ["arcade"],
+                description: "Endless road crossing adventure",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Crossy"
+            },
+            {
+                name: "Cut the Rope",
+                url: "https://www.crazygames.com/game/cut-the-rope",
+                category: ["puzzle"],
+                description: "Feed candy to Om Nom",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Cut+Rope"
+            },
+            {
+                name: "Duck Life",
+                url: "https://www.coolmathgames.com/0-duck-life",
+                category: ["racing", "arcade"],
+                description: "Train your duck to race",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Duck+Life"
+            },
+            {
+                name: "Fireboy and Watergirl",
+                url: "https://www.coolmathgames.com/0-fireboy-and-watergirl-in-the-forest-temple",
+                category: ["puzzle", "multiplayer"],
+                description: "Cooperative puzzle platformer",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Fireboy"
+            },
+            {
+                name: "Flappy Bird",
+                url: "https://flappybird.io",
+                category: ["arcade"],
+                description: "Classic tap to fly challenge",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Flappy"
+            },
+            {
+                name: "Geometry Dash",
+                url: "https://scratch.mit.edu/projects/105500895/",
+                category: ["action", "arcade"],
+                description: "Rhythm-based action platformer",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Geometry"
+            },
+            {
+                name: "Happy Wheels",
+                url: "https://www.totaljerkface.com/happy_wheels.tjf",
+                category: ["action"],
+                description: "Ragdoll physics mayhem",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Happy+Wheels"
+            },
+            {
+                name: "Hill Climb Racing",
+                url: "https://www.crazygames.com/game/hill-climb-racing",
+                category: ["racing"],
+                description: "Physics-based driving game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Hill+Climb"
+            },
+            {
+                name: "Krunker.io",
+                url: "https://krunker.io",
+                category: ["action", "multiplayer"],
+                description: "Fast-paced FPS browser game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Krunker"
+            },
+            {
+                name: "Minecraft Classic",
+                url: "https://classic.minecraft.net",
+                category: ["sandbox", "strategy"],
+                description: "Original creative building game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Minecraft"
+            },
+            {
+                name: "Moto X3M",
+                url: "https://www.crazygames.com/game/moto-x3m",
+                category: ["racing"],
+                description: "Bike racing with stunts",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Moto+X3M"
+            },
+            {
+                name: "Pac-Man",
+                url: "https://www.google.com/logos/2010/pacman10-i.html",
+                category: ["arcade"],
+                description: "Classic arcade maze game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Pac-Man"
+            },
+            {
+                name: "Papa's Pizzeria",
+                url: "https://www.coolmathgames.com/0-papas-pizzeria",
+                category: ["strategy"],
+                description: "Run your own pizza shop",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Papa+Pizza"
+            },
+            {
+                name: "Pokemon Showdown",
+                url: "https://play.pokemonshowdown.com",
+                category: ["strategy", "multiplayer"],
+                description: "Pokemon battle simulator",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Pokemon"
+            },
+            {
+                name: "Run 3",
+                url: "https://www.coolmathgames.com/0-run-3",
+                category: ["action", "arcade"],
+                description: "Space tunnel runner",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Run+3"
+            },
+            {
+                name: "Shell Shockers",
+                url: "https://shellshock.io",
+                category: ["action", "multiplayer"],
+                description: "Egg-based FPS game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Shell+Shock"
+            },
+            {
+                name: "Slope",
+                url: "https://slope-game.github.io",
+                category: ["arcade"],
+                description: "High-speed downhill challenge",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Slope"
+            },
+            {
+                name: "Snake",
+                url: "https://www.google.com/fbx?fbx=snake_arcade",
+                category: ["arcade"],
+                description: "Classic snake eating game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Snake"
+            },
+            {
+                name: "Stick Fight",
+                url: "https://www.crazygames.com/game/stickman-fighter-mega-brawl",
+                category: ["action"],
+                description: "Stickman combat arena",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Stick+Fight"
+            },
+            {
+                name: "Subway Surfers",
+                url: "https://poki.com/en/g/subway-surfers",
+                category: ["arcade"],
+                description: "Endless running parkour",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Subway"
+            },
+            {
+                name: "Super Mario 64",
+                url: "https://www.playretrogames.com/5908-super-mario-64",
+                category: ["action", "arcade"],
+                description: "3D platforming classic",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Mario+64"
+            },
+            {
+                name: "Super Smash Flash 2",
+                url: "https://www.mcleodgaming.com/games/ssf2",
+                category: ["action", "multiplayer"],
+                description: "Platform fighter crossover",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Smash"
+            },
+            {
+                name: "Tank Trouble",
+                url: "https://tanktrouble.com",
+                category: ["action", "multiplayer"],
+                description: "Local multiplayer tank battle",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Tank"
+            },
+            {
+                name: "Temple Run 2",
+                url: "https://poki.com/en/g/temple-run-2",
+                category: ["arcade"],
+                description: "Endless temple escape",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Temple"
+            },
+            {
+                name: "Tetris",
+                url: "https://tetris.com/play-tetris",
+                category: ["puzzle"],
+                description: "Classic block puzzle game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Tetris"
+            },
+            {
+                name: "Tower Defense",
+                url: "https://www.crazygames.com/game/bloons-tower-defense",
+                category: ["strategy"],
+                description: "Defend with strategic towers",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=TD"
+            },
+            {
+                name: "Uno Online",
+                url: "https://www.crazygames.com/game/uno-online",
+                category: ["strategy", "multiplayer"],
+                description: "Classic card game online",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=UNO"
+            },
+            {
+                name: "Vex 5",
+                url: "https://www.crazygames.com/game/vex-5",
+                category: ["action"],
+                description: "Parkour stickman platformer",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Vex+5"
+            },
+            {
+                name: "Wordle",
+                url: "https://www.nytimes.com/games/wordle/index.html",
+                category: ["puzzle"],
+                description: "Daily word guessing game",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Wordle"
+            },
+            {
+                name: "Agar.io",
+                url: "https://agar.io",
+                category: ["multiplayer"],
+                description: "Eat to grow in this arena",
+                thumbnail: "https://via.placeholder.com/300x200/0a0a0f/00f5ff?text=Agar.io"
+            }
+        ];
+
+        // State
+        let currentFilter = 'all';
+        let filteredGames = [...games];
+
+        // Username functions
+        function setUsername() {
+            const name = prompt('Enter your username:');
+            if (name && name.trim()) {
+                localStorage.setItem('nexus_username', name.trim());
+                updateUsernameDisplay();
+                showNotification(`Welcome, ${name.trim()}! 👋`);
+            }
+        }
+
+        function clearUsername() {
+            localStorage.removeItem('nexus_username');
+            updateUsernameDisplay();
+            showNotification('Username cleared! 🔄');
+        }
+
+        function updateUsernameDisplay() {
+            const username = localStorage.getItem('nexus_username');
+            document.getElementById('usernameDisplay').textContent = 
+                username ? `Welcome, ${username}` : 'Welcome, Guest';
+        }
+
+        // Render games
+        function renderGames(gamesToRender = games) {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            
+            gamesToRender.forEach((game, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.style.animationDelay = `${index * 0.05}s`;
+                card.onclick = () => openGame(game);
+                
+                card.innerHTML = `
+                    <img src="${game.thumbnail}" alt="${game.name}" class="game-thumbnail">
+                    <div class="game-info">
+                        <div class="game-title">${game.name}</div>
+                        <div class="game-description">${game.description}</div>
+                        <div class="game-tags">
+                            ${game.category.map(cat => `<span class="game-tag">${cat}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+
+            // Update count
+            document.getElementById('gamesCount').textContent = gamesToRender.length + '+';
+        }
+
+        // Filter games
+        function filterGames(category) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentFilter = category;
+            
+            if (category === 'all') {
+                filteredGames = [...games];
+            } else {
+                filteredGames = games.filter(game => game.category.includes(category));
+            }
+            
+            renderGames(filteredGames);
+        }
+
+        // Search games
+        function searchGames() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const searched = filteredGames.filter(game => 
+                game.name.toLowerCase().includes(query) ||
+                game.description.toLowerCase().includes(query) ||
+                game.category.some(cat => cat.toLowerCase().includes(query))
+            );
+            renderGames(searched);
+        }
+
+        // Open game
+        function openGame(game) {
+            document.getElementById('modalTitle').textContent = game.name;
+            document.getElementById('gameFrame').src = game.url;
+            document.getElementById('gameModal').classList.add('active');
+        }
+
+        // Close game
+        function closeGame() {
+            document.getElementById('gameModal').classList.remove('active');
+            document.getElementById('gameFrame').src = '';
+        }
+
+        // Calculator functions
+        let calcCurrentInput = '0';
+        let calcPreviousInput = '';
+        let calcHistory = [];
+
+        function openCalculator() {
+            document.getElementById('calculatorModal').classList.add('active');
+        }
+
+        function closeCalculator() {
+            document.getElementById('calculatorModal').classList.remove('active');
+        }
+
+        function updateCalcDisplay() {
+            document.getElementById('calcCurrent').textContent = calcCurrentInput;
+            document.getElementById('calcPrevious').textContent = calcPreviousInput;
+        }
+
+        function calcInput(value) {
+            if (calcCurrentInput === '0' || calcCurrentInput === 'Error') {
+                calcCurrentInput = value;
+            } else {
+                calcCurrentInput += value;
+            }
+            updateCalcDisplay();
+        }
+
+        function calcClear() {
+            calcCurrentInput = '0';
+            calcPreviousInput = '';
+            updateCalcDisplay();
+        }
+
+        function calcDelete() {
+            if (calcCurrentInput.length > 1) {
+                calcCurrentInput = calcCurrentInput.slice(0, -1);
+            } else {
+                calcCurrentInput = '0';
+            }
+            updateCalcDisplay();
+        }
+
+        function calcEquals() {
+            try {
+                const expression = calcCurrentInput
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/−/g, '-');
+                
+                const result = eval(expression);
+                
+                // Add to history
+                const historyItem = `${calcCurrentInput} = ${result}`;
+                calcHistory.unshift(historyItem);
+                if (calcHistory.length > 10) calcHistory.pop();
+                
+                // Update history display
+                const historyEl = document.getElementById('calcHistory');
+                historyEl.innerHTML = calcHistory.map(item => 
+                    `<div class="calc-history-item">${item}</div>`
+                ).join('');
+                
+                calcPreviousInput = calcCurrentInput + ' =';
+                calcCurrentInput = result.toString();
+                updateCalcDisplay();
+            } catch (error) {
+                calcCurrentInput = 'Error';
+                updateCalcDisplay();
+                setTimeout(() => {
+                    calcCurrentInput = '0';
+                    calcPreviousInput = '';
+                    updateCalcDisplay();
+                }, 2000);
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('calculatorModal');
+            if (!modal.classList.contains('active')) return;
+            
+            if (e.key >= '0' && e.key <= '9') calcInput(e.key);
+            else if (e.key === '.') calcInput('.');
+            else if (e.key === '+') calcInput('+');
+            else if (e.key === '-') calcInput('-');
+            else if (e.key === '*') calcInput('*');
+            else if (e.key === '/') { e.preventDefault(); calcInput('/'); }
+            else if (e.key === '%') calcInput('%');
+            else if (e.key === 'Enter') { e.preventDefault(); calcEquals(); }
+            else if (e.key === 'Escape') closeCalculator();
+            else if (e.key === 'Backspace') { e.preventDefault(); calcDelete(); }
+            else if (e.key === 'c' || e.key === 'C') { e.preventDefault(); calcClear(); }
+        });
+
+        // Cloak functions
+        const cloaks = {
+            'google-classroom': {
+                title: 'Classes',
+                favicon: 'https://ssl.gstatic.com/classroom/ic_product_classroom_32.png'
+            },
+            'google-drive': {
+                title: 'My Drive - Google Drive',
+                favicon: 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png'
+            },
+            'google-docs': {
+                title: 'Untitled document - Google Docs',
+                favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico'
+            }
+        };
+
+        function openCloakMenu() {
+            document.getElementById('cloakMenu').classList.add('active');
+        }
+
+        function closeCloakMenu() {
+            document.getElementById('cloakMenu').classList.remove('active');
+        }
+
+        function setCloak(type) {
+            if (type === 'reset') {
+                document.title = 'NEXUS // Game Hub';
+                const favicon = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                favicon.rel = 'shortcut icon';
+                favicon.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎮</text></svg>';
+                document.head.appendChild(favicon);
+                showNotification('Tab reset to normal! 🎮');
+            } else {
+                const cloak = cloaks[type];
+                if (cloak) {
+                    document.title = cloak.title;
+                    const favicon = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                    favicon.rel = 'shortcut icon';
+                    favicon.href = cloak.favicon;
+                    document.head.appendChild(favicon);
+                    showNotification(`Tab disguised as ${cloak.title}! 🎭`);
+                }
+            }
+            closeCloakMenu();
+        }
+
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                showNotification('Entered fullscreen mode! ⛶');
+            } else {
+                document.exitFullscreen();
+                showNotification('Exited fullscreen mode! ⛶');
+            }
+        }
+
+        // Notification
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.remove();
+            }, 3000);
+        }
+
+        // Close modals on click outside
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('gameModal')) {
+                closeGame();
+            }
+            if (event.target === document.getElementById('calculatorModal')) {
+                closeCalculator();
+            }
+            if (event.target === document.getElementById('cloakMenu')) {
+                closeCloakMenu();
+            }
+        }
+
+        // Escape key to close modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeGame();
+                closeCalculator();
+                closeCloakMenu();
+            }
+        });
+
+        // Initialize
+        updateUsernameDisplay();
+        renderGames();
+    </script>
+</body>
+</html>
